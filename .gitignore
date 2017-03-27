@@ -1,3 +1,4 @@
 res/artists.txt
 res/auth-key.txt
 commands.sh
+target/*
