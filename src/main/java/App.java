@@ -76,46 +76,4 @@ public class App {
                 .collect(Collectors.joining("\n"));
        FileUtils.writeStringToFile(new File("commands.sh"), curlCommands);
     }
-
-    private void addAllArtistsTopTracksToPlayList(Api api, String playListId, String username, List<String> artistIds) throws InterruptedException, IOException, WebApiException {
-                List<String> topTrackIds = new ArrayList<>();
-
-        artistIds.stream()
-                .forEach(artistId ->{
-                    try {
-                        final List<Track> tracks = api.getTopTracksForArtist(artistId, "ch").build().get();
-                        if (tracks.size() <= 0){
-                            System.err.println("No Track found for artistId "+artistId);
-                            return;
-                        }
-                        final Track track = tracks.get(0);
-                        System.out.println("Working on track "+track.getName());
-
-                        topTrackIds.add(track.getId());
-                    } catch (IOException e) {
-                        System.err.println(e);
-                        e.printStackTrace();
-                    } catch (WebApiException e) {
-                        System.err.println(e);
-                        e.printStackTrace();
-                    }
-                    try {
-                        Thread.sleep(API_WAIT_TIME);
-                    } catch (InterruptedException e) {
-                        System.err.println(e);
-                        e.printStackTrace();
-                    }
-                });
-
-        List<String> trackUris = topTrackIds.stream()
-                .map(topTrackId -> "spotify:track:"+topTrackId)
-                .collect(Collectors.toList());
-
-//        FileUtils.writeStringToFile(new File("trackUris"), trackUris.stream().collect(Collectors.joining("\n")));
-
-        for (int i = 0; i<trackUris.size(); i++){
-            api.addTracksToPlaylist(username, playListId, Arrays.asList(trackUris.get(i))).build().postJson();
-            Thread.sleep(API_WAIT_TIME);
-        }
-    }
 }
