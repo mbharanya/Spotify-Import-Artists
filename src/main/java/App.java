@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class App {
     private static final String ARTISTS_FILE_PATH = "res"+File.separator+"artists.txt";
-    public static final int API_WAIT_TIME = 100;
+    private static final int API_WAIT_TIME = 100;
     private static final String ACCESS_TOKEN_PATH = "res"+File.separator+"auth-key.txt";
     private static final String DEFAULT_ENCODING = "UTF-8";
 
@@ -23,7 +23,7 @@ public class App {
 
         List<Artist> foundArtists = new ArrayList<>();
 
-        artistNames.stream()
+        artistNames
                 .forEach(artistName -> {
                     SearchArtistsRequest request = api.searchArtists(artistName).build();
                     try {
@@ -65,7 +65,7 @@ public class App {
     }
 
 	private static void logError ( Exception e ){
-		System.err.println(e);
+		System.err.println(e.getMessage());
 		e.printStackTrace();
 	}
 }
