@@ -17,14 +17,15 @@ public class App {
     private static final String ARTISTS_FILE_PATH = "res"+File.separator+"artists.txt";
     public static final int API_WAIT_TIME = 100;
     private static final String ACCESS_TOKEN_PATH = "res"+File.separator+"auth-key.txt";
+    private static final String ARTISTS_FILE_ENCODING = "UTF-8";
 
     public static void main(String... args) throws IOException{
         // Create an API instance. The default instance connects to https://api.spotify.com/.
-        SpotifyApi api = new SpotifyApi.Builder().setAccessToken(FileUtils.readFileToString(new File(ACCESS_TOKEN_PATH))).build();
+        SpotifyApi api = new SpotifyApi.Builder().setAccessToken(FileUtils.readFileToString(new File(ACCESS_TOKEN_PATH), ARTISTS_FILE_ENCODING)).build();
 
         List<String> artistNames = FileUtils.readLines(new File(ARTISTS_FILE_PATH), "UTF-8");
 
-        List<String> artistIds = new ArrayList<>();
+        List<Artist> foundArtists = new ArrayList<>();
 
         artistNames.stream()
                 .forEach(artistName -> {
@@ -43,7 +44,7 @@ public class App {
                         }
                         final Artist artist = artists[0];
                         System.out.println("Working on "+artist.getName());
-                        artistIds.add(artist.getId());
+                        foundArtists.add(artist);
                     } catch (IOException e) {
                         System.err.println(e);
                         e.printStackTrace();
@@ -53,11 +54,13 @@ public class App {
                     }
                 });
 
-       String curlCommands = artistIds.stream()
-                .map(artistId -> {
+       String curlCommands = foundArtists.stream()
+                .map(artist -> {
                     try {
-                        return "curl -X PUT \"https://api.spotify.com/v1/me/following?type=artist&ids=" +
-                                        artistId +
+                        return 
+                        "# "+artist.getName()+"\n"+
+                        "curl -X PUT \"https://api.spotify.com/v1/me/following?type=artist&ids=" +
+                                        artist.getId() +
                                         "\" -H \"Accept: application/json\" -H \"Authorization: Bearer " +
                                         FileUtils.readFileToString(new File(ACCESS_TOKEN_PATH))+
                                         "\"\n";
