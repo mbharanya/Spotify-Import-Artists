@@ -38,6 +38,7 @@ public class App {
                     try {
                         Thread.sleep(API_WAIT_TIME);
                     } catch (InterruptedException e) {
+                        System.err.println(e);
                         e.printStackTrace();
                     }
                     try {
@@ -50,8 +51,10 @@ public class App {
                         System.out.println("Working on "+artist.getName());
                         artistIds.add(artist.getId());
                     } catch (IOException e) {
+                        System.err.println(e);
                         e.printStackTrace();
                     } catch (WebApiException e) {
+                        System.err.println(e);
                         e.printStackTrace();
                     }
                 });
@@ -65,6 +68,7 @@ public class App {
                                         FileUtils.readFileToString(new File(ACCESS_TOKEN_PATH))+
                                         "\"\n";
                     } catch (IOException e) {
+                        System.err.println(e);
                         e.printStackTrace();
                     }
                     return "";
@@ -89,13 +93,16 @@ public class App {
 
                         topTrackIds.add(track.getId());
                     } catch (IOException e) {
+                        System.err.println(e);
                         e.printStackTrace();
                     } catch (WebApiException e) {
+                        System.err.println(e);
                         e.printStackTrace();
                     }
                     try {
                         Thread.sleep(API_WAIT_TIME);
                     } catch (InterruptedException e) {
+                        System.err.println(e);
                         e.printStackTrace();
                     }
                 });
