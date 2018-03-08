@@ -10,3 +10,6 @@ https://developer.spotify.com/web-api/console/put-following/
 4. execute the generated shell script `./commands.sh`
 5. ???
 6. Profit
+
+How to build:
+1. execute `mvn clean compile assembly:single` to create the jar
