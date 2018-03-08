@@ -10,18 +10,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Created by XMBomb on 12.03.2017.
- */
 public class App {
     private static final String ARTISTS_FILE_PATH = "res"+File.separator+"artists.txt";
     public static final int API_WAIT_TIME = 100;
     private static final String ACCESS_TOKEN_PATH = "res"+File.separator+"auth-key.txt";
-    private static final String ARTISTS_FILE_ENCODING = "UTF-8";
+    private static final String DEFAULT_ENCODING = "UTF-8";
 
     public static void main(String... args) throws IOException{
-        // Create an API instance. The default instance connects to https://api.spotify.com/.
-        SpotifyApi api = new SpotifyApi.Builder().setAccessToken(FileUtils.readFileToString(new File(ACCESS_TOKEN_PATH), ARTISTS_FILE_ENCODING)).build();
+        SpotifyApi api = new SpotifyApi.Builder().setAccessToken(FileUtils.readFileToString(new File(ACCESS_TOKEN_PATH), DEFAULT_ENCODING )).build();
 
         List<String> artistNames = FileUtils.readLines(new File(ARTISTS_FILE_PATH), "UTF-8");
 
@@ -33,8 +29,7 @@ public class App {
                     try {
                         Thread.sleep(API_WAIT_TIME);
                     } catch (InterruptedException e) {
-                        System.err.println(e);
-                        e.printStackTrace();
+						logError( e );
                     }
                     try {
                         Artist[] artists = request.execute().getItems();
@@ -45,12 +40,8 @@ public class App {
                         final Artist artist = artists[0];
                         System.out.println("Working on "+artist.getName());
                         foundArtists.add(artist);
-                    } catch (IOException e) {
-                        System.err.println(e);
-                        e.printStackTrace();
-                    } catch (SpotifyWebApiException e) {
-                        System.err.println(e);
-                        e.printStackTrace();
+                    } catch (IOException|SpotifyWebApiException e) {
+                        logError( e );
                     }
                 });
 
@@ -62,15 +53,19 @@ public class App {
                         "curl -X PUT \"https://api.spotify.com/v1/me/following?type=artist&ids=" +
                                         artist.getId() +
                                         "\" -H \"Accept: application/json\" -H \"Authorization: Bearer " +
-                                        FileUtils.readFileToString(new File(ACCESS_TOKEN_PATH))+
+                                        FileUtils.readFileToString(new File(ACCESS_TOKEN_PATH), DEFAULT_ENCODING )+
                                         "\"\n";
                     } catch (IOException e) {
-                        System.err.println(e);
-                        e.printStackTrace();
+                        logError( e );
                     }
                     return "";
                 })
                 .collect(Collectors.joining("\n"));
-       FileUtils.writeStringToFile(new File("commands.sh"), curlCommands);
+       FileUtils.writeStringToFile(new File("commands.sh"), curlCommands, DEFAULT_ENCODING);
     }
+
+	private static void logError ( Exception e ){
+		System.err.println(e);
+		e.printStackTrace();
+	}
 }
