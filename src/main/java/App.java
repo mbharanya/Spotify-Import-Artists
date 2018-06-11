@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 public class App {
     private static final String ARTISTS_FILE_PATH = "res"+File.separator+"artists.txt";
+    private static final String NOT_FOUND_ARTISTS_FILE_PATH = "notFound.txt";
     private static final int API_WAIT_TIME = 100;
     private static final String ACCESS_TOKEN_PATH = "res"+File.separator+"auth-key.txt";
     private static final String DEFAULT_ENCODING = "UTF-8";
@@ -22,6 +23,7 @@ public class App {
         List<String> artistNames = FileUtils.readLines(new File(ARTISTS_FILE_PATH), "UTF-8");
 
         List<Artist> foundArtists = new ArrayList<>();
+        List<String> notFoundArtists = new ArrayList<String>();
 
         artistNames
                 .forEach(artistName -> {
@@ -34,7 +36,8 @@ public class App {
                     try {
                         Artist[] artists = request.execute().getItems();
                         if (artists.length <= 0){
-                            System.err.println("No Artist found for artistName "+artistName);
+                            System.err.println("No artist found for artistName "+artistName);
+                            notFoundArtists.add(artistName);
                             return;
                         }
                         final Artist artist = artists[0];
@@ -48,7 +51,7 @@ public class App {
        String curlCommands = foundArtists.stream()
                 .map(artist -> {
                     try {
-                        return 
+                        return
                         "# "+artist.getName()+"\n"+
                         "curl -X PUT \"https://api.spotify.com/v1/me/following?type=artist&ids=" +
                                         artist.getId() +
@@ -62,6 +65,21 @@ public class App {
                 })
                 .collect(Collectors.joining("\n"));
        FileUtils.writeStringToFile(new File("commands.sh"), curlCommands, DEFAULT_ENCODING);
+
+       if (notFoundArtists.size() > 0) {
+           String notFoundArtistsString = "";
+           for (String s : notFoundArtists) {
+               if (notFoundArtistsString.isEmpty() == false) {
+                   notFoundArtistsString = notFoundArtistsString + "\n" + s;
+               }
+               else {
+                   notFoundArtistsString = s;
+               }
+           }
+           FileUtils.writeStringToFile(new File(NOT_FOUND_ARTISTS_FILE_PATH), notFoundArtistsString, DEFAULT_ENCODING);
+           System.out.println("The " + notFoundArtists.size() + " artist(s) which could not be found were written to " +
+                   NOT_FOUND_ARTISTS_FILE_PATH + ".");
+       }
     }
 
 	private static void logError ( Exception e ){
